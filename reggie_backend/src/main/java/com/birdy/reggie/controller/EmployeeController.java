@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 
 /**
  * @author Birdy
@@ -75,5 +77,28 @@ public class EmployeeController {
         request.getSession().removeAttribute("employee");
 
         return R.success("退出成功");
+    }
+
+    /**
+     * 新增员工
+     * @param employee
+     * @param request
+     * @return
+     */
+    @PostMapping
+    public R<String> save(HttpServletRequest request, @RequestBody Employee employee) {
+        log.info("新增员工信息: {}", employee.toString());
+
+        // 设置员工初始密码为 123456，并用 md5 加密
+        employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
+        employee.setCreateTime(LocalDateTime.now());
+        employee.setUpdateTime(LocalDateTime.now());
+
+        employee.setCreateUser((Long) request.getSession().getAttribute("employee"));
+        employee.setUpdateUser((Long) request.getSession().getAttribute("employee"));
+
+        employeeService.save(employee);
+
+        return R.success("新增员工成功");
     }
 }
