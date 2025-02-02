@@ -1,6 +1,7 @@
 package com.birdy.reggie.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.birdy.reggie.common.BaseContext;
 import com.birdy.reggie.common.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
@@ -49,6 +50,8 @@ public class LoginCheckFilter implements Filter {
 
         // 判断是否登录，已经登录则直接放行
         if(request.getSession().getAttribute("employee") != null) {
+            BaseContext.setCurrentId((Long) request.getSession().getAttribute("employee"));
+
             filterChain.doFilter(request, response);
             return ;
         }
