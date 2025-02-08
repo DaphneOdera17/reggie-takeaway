@@ -48,7 +48,7 @@ public class UserController {
             String code = ValidateCodeUtils.generateValidateCode(4).toString();
             log.info("code={}", code);
 
-            SMSUtils.sendMessage(aliyunSMS.getSignName(), aliyunSMS.getTemplateCode(), phone, code);
+//            SMSUtils.sendMessage(aliyunSMS.getSignName(), aliyunSMS.getTemplateCode(), phone, code);
 
             session.setAttribute(phone, code);
             return R.success("验证码发送成功");

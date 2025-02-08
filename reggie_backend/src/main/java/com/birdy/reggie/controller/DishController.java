@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.birdy.reggie.common.R;
 import com.birdy.reggie.dto.DishDto;
 import com.birdy.reggie.entity.Dish;
+import com.birdy.reggie.entity.DishFlavor;
 import com.birdy.reggie.service.CategoryService;
 import com.birdy.reggie.service.DishFlavorService;
 import com.birdy.reggie.service.DishService;
@@ -110,7 +111,7 @@ public class DishController {
      * @return
      */
     @GetMapping("/list")
-    public R<List<Dish>> list(Dish dish) {
+    public R<List<DishDto>> list(Dish dish) {
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
 
         queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
@@ -118,6 +119,24 @@ public class DishController {
         queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
 
         List<Dish> list = dishService.list(queryWrapper);
-        return R.success(list);
+
+        List<DishDto> dishDtoList = list.stream().map((item) -> {
+            DishDto dishDto = new DishDto();
+
+            BeanUtils.copyProperties(item, dishDto);
+            Long categoryId = item.getCategoryId();
+
+            dishDto.setCategoryName(categoryService.getById(categoryId).getName());
+
+            Long dishId = item.getId();
+            LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(DishFlavor::getDishId, dishId);
+            List<DishFlavor> flavorList = dishFlavorService.list(lambdaQueryWrapper);
+            dishDto.setFlavors(flavorList);
+
+            return dishDto;
+        }).collect(Collectors.toList());
+
+        return R.success(dishDtoList);
     }
 }
